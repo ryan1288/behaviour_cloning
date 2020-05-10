@@ -1,13 +1,5 @@
-# **Behavioral Cloning** 
-
-## Writeup Template
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
+# **Behavioral Cloning Project**
 ---
-
-**Behavioral Cloning Project**
-
 The goals / steps of this project are the following:
 * Use the simulator to collect data of good driving behavior
 * Build, a convolution neural network in Keras that predicts steering angles from images
@@ -18,112 +10,124 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/placeholder.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
-
-## Rubric Points
-### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
+[image1]: report_images/LeNet.jpg
+[image2]: report_images/Nvidia.jpg
+[image3]: report_images/center.jpg
+[image4]: report_images/left.jpg
+[image5]: report_images/right.jpg
+[image6]: report_images/hist1.jpg
+[image7]: report_images/hist2.jpg
+[image8]: report_images/history.jpg
 
 ---
-### Files Submitted & Code Quality
+## Model Architecture and Training Strategy
 
-#### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
+### Model Architecture
 
-My project includes the following files:
-* model.py containing the script to create and train the model
-* drive.py for driving the car in autonomous mode
-* model.h5 containing a trained convolution neural network 
-* writeup_report.md or writeup_report.pdf summarizing the results
+My model consists is based off of the LeNet Architecture but fully retrained for my training data with a different optimizer and one output. The code for generating and training models are all in `model.py`.
 
-#### 2. Submission includes functional code
-Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
-```sh
-python drive.py model.h5
-```
+As shown below, the LeNet architecture was used with no major modifications, but pre-processing and modifications were added.
+![][image1]
 
-#### 3. Submission code is usable and readable
+I also tried the Nvidia self-driving car architecture using deep learning interchangably and compared the two's performance.
+![][image2]
 
-The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
+Both tested models include ReLU layers to introduce nonlinearity [Code line 105 (and all other convolutional layers)], and the data is normalized in the model using a Keras lambda layer [Code line 104 and 135]. 
 
-### Model Architecture and Training Strategy
+### Reduce Overfitting
+Both models contain dropout layers in order to reduce overfitting [Code line 111 (and after all other fully connected layers)]. 
 
-#### 1. An appropriate model architecture has been employed
+Max Pooling was also used in the LeNet architecture [Code lines 106 and 108], reducing the size of hte feature map between after each convolutional layer. 
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
+After validating the training on different data sets (or a mix of them) to ensure the model isn't overfitting, the model was used to autonomously drive the car successfully through the track without leaving the drivable area.
 
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
+### Model Parameter Tuning
+Using an Adam optimizer [Code lines 119 and 154], the learning rate was not tuned manually.
 
-#### 2. Attempts to reduce overfitting in the model
+### Training Data
+Training data was strategically created:
+* Center lane driving for 4 laps
+* Reverse direction driving for 2 laps
+* One lap of only recording smooth corner turns
+* One lap of only recording recovery from different edges
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
+Further details are below in data acquisition. 
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+## Training Strategy
 
-#### 3. Model parameter tuning
+### 1. Solution Design Approach
+The overall strategy for deriving a model architecture was to start simple and then try different additions/pre-processing techniques before implementing a full architecture from elsewhere (LeNet and Nvidia in this case).
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+My first step was to use only a single fully connected layer. It was evidently inaccurate as it only outputted +_25 deg, but it did move the car in the simulator.
 
-#### 4. Appropriate training data
+After confirming the basic model implementation, both the LeNet and Nvidia architecutres were implemented, and then the data was split into a randomized training and validation set for steering angle data.
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+By looking at the mean-squared loss error visualized over the epochs, I can see if I was overfitting (training error << validation error) or underfitting (large error). This led me to either add dropout layers or improve the complexity of the model (add more convolutions or fully connected layers). An example of the loss visualization is shown below:
 
-For details about how I created the training data, see the next section. 
+![][image8]
 
-### Model Architecture and Training Strategy
+Additionally, I found that data was extremely important, as poor data will not only produce bad driving, but will lead the model to go off the track (e.g. go straight through a turn).
 
-#### 1. Solution Design Approach
+To combat the overfitting, I modified the model to not overfit, provided increasing amounts of data, and generated more data through flipping and using more cameras.
 
-The overall strategy for deriving a model architecture was to ...
+The histogram of angles in my training data is shown below:
 
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
+![][image6]
 
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
+By flipping the data alone, the data is symmetrical about 0 degrees as shown below:
 
-To combat the overfitting, I modified the model so that ...
+![][image7]
 
-Then I ... 
-
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
+After numerous tests on the racetrack, the LeNet architecture performed more consistently on recovery, proving to be more consistent than the model built off of Nvidia. Often, the Nvidia model will go straight when it should turn despite being trained on the same data.
 
 At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
 
-#### 2. Final Model Architecture
+### 2. Final Model Architecture
+The final model architecture [Code lines 95 to 124] consisted of a convolution neural network with the following layers and layer sizes:
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
+| Layer         		|     Description	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| Input         		| 160x320x3 RGB image   							| 
+| Cropping        		| 65x320x3 RGB image   							| 
+| Normalization      | 65x320x3 RGB image   							| 
+| Convolution 5x5  	| 1x1 stride, valid padding, outputs 61x316x6 	|
+| RELU					|												|
+| Max pooling	      	| 2x2 stride,  outputs 31x31x6 					|
+| Convolution 5x5     	| 1x1 stride, valid padding, outputs 27x27x6 	|
+| RELU					|												|
+| Max pooling	      	| 2x2 stride, outputs 14x14x6 					|
+| Flattening	        | Array of 1176 (= 14x14x6) 						|
+| Fully connected		| Output of size 120							|
+| RELU					|												|
+| Dropout				|		50% drop rate										|
+| Fully connected		| Output of size 86								|
+| RELU					|												|
+| Dropout				|		50% drop rate										|
+| Fully connected		| Output of size 1								|
 
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
+### 3. Creation of the Training Set & Training Process
+As described before, the reasoning behind the strategic training data collection was:
+* Center lane driving - ensure the car stays near the center of the road
+* Reverse direction driving - improve generalization of the model
+* Only smooth corner turns - improve the ratio of higher angle turning to lower the dominance of small angles as most driving is straight
+* Only recovery from sides - add more data to learn recovering from sides during straight roads and turns of different line colors
 
-![alt text][image1]
+Afterwards, the data from all three cameras on the simulated car was used and they were all flipped to double the data set and prevent left-turn biasing due to the counter-clockwise driving.
 
-#### 3. Creation of the Training Set & Training Process
+An example of the data is shown below:
 
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
+Center camera:
 
-![alt text][image2]
+![][image3]
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
+Left Camera: 
 
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
+![][image4]
 
-Then I repeated this process on track two in order to get more data points.
+Right Camera:
 
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
+![][image5]
 
-![alt text][image6]
-![alt text][image7]
+After the collection process, I had approximately 48000 (= 6 * 8000) data points due to the generated data. I then preprocessed this data by cropping 70 pixels off the top and 25 pixels off the bottom to remove the background and the front of the car to prevent the model fitting to the background environment (trees, water, etc.) and also to improve its generalizability and robustness.
 
-Etc ....
-
-After the collection process, I had X number of data points. I then preprocessed this data by ...
-
-
-I finally randomly shuffled the data set and put Y% of the data into a validation set. 
-
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+Finally, the data is randomized and 20% is used as a validation set during training, and also to be used as loss visualization, which is used to determine over/underfitting
