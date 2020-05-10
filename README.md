@@ -129,4 +129,8 @@ Right Camera:
 
 After the collection process, I had approximately 48000 (= 6 * 8000) data points due to the generated data. I then preprocessed this data by cropping 70 pixels off the top and 25 pixels off the bottom to remove the background and the front of the car to prevent the model fitting to the background environment (trees, water, etc.) and also to improve its generalizability and robustness.
 
+The data was also normalized using the Lambda function in Keras: `model.add(Lambda(lambda x: x/ 255.0 - 0.5))`. To center the data about the origin for better training results.
+
 Finally, the data is randomized and 20% is used as a validation set during training, and also to be used as loss visualization, which is used to determine over/underfitting
+
+The training process is in batches, optimized through the use of a generator [Code line 46] and `yield` instead of `return` to retain the offset location of the batch in the full training dataset.
