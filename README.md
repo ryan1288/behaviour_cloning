@@ -10,8 +10,7 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: report_images/LeNet.jpg
-[image2]: report_images/Nvidia.png
+[image1]: report_images/LeNet.png
 [image3]: report_images/center.JPG
 [image4]: report_images/left.JPG
 [image5]: report_images/right.JPG
@@ -30,7 +29,7 @@ As shown below, the LeNet architecture was used with no major modifications, but
 ![][image1]
 
 I also tried the Nvidia self-driving car architecture using deep learning interchangably and compared the two's performance.
-![][image2]
+<img src="report_images/Nvidia.png" width="300">
 
 Both tested models include ReLU layers to introduce nonlinearity [Code line 105 (and all other convolutional layers)], and the data is normalized in the model using a Keras lambda layer [Code line 104 and 135]. 
 
