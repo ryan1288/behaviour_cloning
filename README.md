@@ -11,13 +11,13 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [image1]: report_images/LeNet.jpg
-[image2]: report_images/Nvidia.jpg
-[image3]: report_images/center.jpg
-[image4]: report_images/left.jpg
-[image5]: report_images/right.jpg
-[image6]: report_images/hist1.jpg
-[image7]: report_images/hist2.jpg
-[image8]: report_images/history.jpg
+[image2]: report_images/Nvidia.png
+[image3]: report_images/center.JPG
+[image4]: report_images/left.JPG
+[image5]: report_images/right.JPG
+[image6]: report_images/hist1.JPG
+[image7]: report_images/hist2.JPG
+[image8]: report_images/history.JPG
 
 ---
 ## Model Architecture and Training Strategy
